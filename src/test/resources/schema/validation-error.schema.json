@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Validation Error response",
+  "type": "object",
+  "required": [
+    "error",
+    "code",
+    "details"
+  ],
+  "properties": {
+    "error": {
+      "type": "string"
+    },
+    "code": {
+      "enum": [
+        "VALIDATION_ERROR"
+      ]
+    },
+    "details": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "field",
+          "message"
+        ],
+        "properties": {
+          "field": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

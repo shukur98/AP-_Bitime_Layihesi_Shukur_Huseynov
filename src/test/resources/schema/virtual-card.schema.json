@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "required": [
+    "id",
+    "accountId",
+    "maskedPan",
+    "expiry",
+    "currency",
+    "status",
+    "availableBalance",
+    "limits",
+    "spentToday",
+    "blockReason",
+    "blockedAt",
+    "createdAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^vcd_"
+    },
+    "accountId": {
+      "type": "string"
+    },
+    "maskedPan": {
+      "type": "string",
+      "pattern": "^4169 73\\*\\* \\*{4} [0-9]{4}$"
+    },
+    "expiry": {
+      "type": "string",
+      "pattern": "^(0[1-9]|1[0-2])/[0-9]{2}$"
+    },
+    "currency": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "ACTIVE",
+        "FROZEN",
+        "BLOCKED"
+      ]
+    },
+    "availableBalance": {
+      "type": "number",
+      "minimum": 0
+    },
+    "limits": {
+      "type": "object",
+      "required": [
+        "dailyOnline",
+        "perTransaction"
+      ],
+      "properties": {
+        "dailyOnline": {
+          "type": "number"
+        },
+        "perTransaction": {
+          "type": "number"
+        }
+      }
+    },
+    "spentToday": {
+      "type": "number",
+      "minimum": 0
+    },
+    "blockReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "blockedAt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "createdAt": {
+      "type": "string"
+    }
+  }
+}

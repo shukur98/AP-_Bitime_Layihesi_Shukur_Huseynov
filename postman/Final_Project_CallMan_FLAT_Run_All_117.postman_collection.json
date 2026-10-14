@@ -1,0 +1,5412 @@
+{
+  "info": {
+    "_postman_id": "365dbe3c-192b-4161-a194-0102568832cd",
+    "name": "API Final Project | FLAT RUN ALL 117 | Sequential QA",
+    "description": "Flattened from 6 existing folders; all 117 requests remain in original order. Imported scripts, headers, bodies and variables preserved. Activate the original API Final Project token sandbox (QA) environment before running. Run once sequentially.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 / AUTH-01 · Login user1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Test case mapping: AUTH-01.\nExpected status: 200.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{user1Email}}\",\"password\":\"{{user1Password}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const envKeys=['tokenUser1','tokenUser2','benId1','benId2','benId11','cardA','cardB','cardC','cardD','cardUSD','firstPaymentId','firstReceiptNo','citynetTotal','bakTime','historyCount'];",
+              "pm.environment.set('paymentsByBakuDate','{}');",
+              "envKeys.forEach(k=>pm.environment.unset(k));",
+              "function validAzIban(i){",
+              "  const account=String(900000+i).padStart(20,'0');",
+              "  const moved='AIIB'+account+'AZ00';",
+              "  let r=0;",
+              "  for(const ch of moved){ const digits=ch>='A'&&ch<='Z'?String(ch.charCodeAt(0)-55):ch;",
+              "    for(const digit of digits) r=(r*10+Number(digit))%97;",
+              "  }",
+              "  return 'AZ'+String(98-r).padStart(2,'0')+'AIIB'+account;",
+              "}",
+              "for(let i=1;i<=12;i++) pm.environment.set('benIban'+i,validAzIban(i));",
+              "const f=pm.environment.get('benIban2');pm.environment.set('benIban2Formatted',(f.slice(0,4)+' '+f.slice(4,8)+' '+f.slice(8)).toLowerCase());",
+              "for(let i=1;i<=32;i++) pm.environment.set('payKey'+i,pm.random.uuid());",
+              "const baku=new Date(Date.now()+4*60*60*1000).toISOString().slice(0,10);",
+              "pm.environment.set('todayBaku',baku);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"AUTH-01 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"AUTH-01 / assertion 1\", () => { const d = pm.response.json(); pm.expect(typeof d.token).to.equal(\"string\"); pm.expect(d.token.length>10).to.equal(true); });",
+              "if (pm.response.code === 200) { const d = pm.response.json(); pm.environment.set(\"tokenUser1\", d.token); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "00 / AUTH-02 · Login user2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Test case mapping: AUTH-02.\nExpected status: 200.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{user2Email}}\",\"password\":\"{{user2Password}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"AUTH-02 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"AUTH-02 / assertion 1\", () => { const d = pm.response.json(); pm.expect(typeof d.token).to.equal(\"string\"); });",
+              "if (pm.response.code === 200) { const d = pm.response.json(); pm.environment.set(\"tokenUser2\", d.token); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "00 / AUTH-03 · GET without token → 401",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/billers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "billers"
+          ]
+        },
+        "description": "Test case mapping: G301-013.\nExpected status: 401.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G301-013 / HTTP 401\", () => pm.expect(pm.response.code).to.equal(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "00 / AUTH-04 · GET invalid token → 401",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer invalid-token"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/billers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "billers"
+          ]
+        },
+        "description": "Test case mapping: G301-014.\nExpected status: 401.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G301-014 / HTTP 401\", () => pm.expect(pm.response.code).to.equal(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Create beneficiary #1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-001.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Nigar Əliyeva\",\"iban\":\"{{benIban1}}\",\"currency\":\"AZN\",\"nickname\":\"Anam\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G101-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.id).to.match(/^ben_.{8}$/); });",
+              "pm.test(\"G101-001 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.currency).to.equal(\"AZN\"); });",
+              "pm.test(\"G101-001 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.iban.indexOf(\" \")).to.equal(-1); });",
+              "pm.test(\"G101-001 / assertion 4\", () => { const d = pm.response.json(); pm.expect(typeof d.ibanMasked).to.equal(\"string\"); });",
+              "pm.test(\"G101-001 / assertion 5\", () => { const d = pm.response.json(); pm.expect(pm.response.headers.get(\"Location\")).to.equal(\"/beneficiaries/\"+d.id); });",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.environment.set(\"benId1\", d.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Create beneficiary #2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-002.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Tural Hüseynov\",\"iban\":\"{{benIban2Formatted}}\",\"currency\":\"AZN\",\"nickname\":\"Dost\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-002 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G101-002 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.id).to.match(/^ben_.{8}$/); });",
+              "pm.test(\"G101-002 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.currency).to.equal(\"AZN\"); });",
+              "pm.test(\"G101-002 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.iban.indexOf(\" \")).to.equal(-1); });",
+              "pm.test(\"G101-002 / assertion 4\", () => { const d = pm.response.json(); pm.expect(typeof d.ibanMasked).to.equal(\"string\"); });",
+              "pm.test(\"G101-002 / assertion 5\", () => { const d = pm.response.json(); pm.expect(pm.response.headers.get(\"Location\")).to.equal(\"/beneficiaries/\"+d.id); });",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.environment.set(\"benId2\", d.id); }",
+              "pm.test(\"G101-002 / normalizes lowercase and spaces\", () => { const d=pm.response.json(); pm.expect(d.iban).to.equal(pm.environment.get(\"benIban2\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Create beneficiary #3",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-003.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Əli Həsənov\",\"iban\":\"{{benIban3}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-003 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G101-003 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.id).to.match(/^ben_.{8}$/); });",
+              "pm.test(\"G101-003 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.currency).to.equal(\"AZN\"); });",
+              "pm.test(\"G101-003 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.iban.indexOf(\" \")).to.equal(-1); });",
+              "pm.test(\"G101-003 / assertion 4\", () => { const d = pm.response.json(); pm.expect(typeof d.ibanMasked).to.equal(\"string\"); });",
+              "pm.test(\"G101-003 / assertion 5\", () => { const d = pm.response.json(); pm.expect(pm.response.headers.get(\"Location\")).to.equal(\"/beneficiaries/\"+d.id); });",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.environment.set(\"benId3\", d.id); }",
+              "pm.test(\"G101-003 / nickname omitted is null\", () => { const d=pm.response.json(); pm.expect(d.nickname).to.equal(null); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G102 · Default list 3 entries",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G102-001.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G102-001 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G102-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(3); pm.expect(d.items.length).to.equal(3); });",
+              "pm.test(\"G102-001 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.items.some(x=>x.id===pm.environment.get(\"benId1\"))).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G102 · Search name case-insensitive",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries?q=NIGAR",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "NIGAR"
+            }
+          ]
+        },
+        "description": "Test case mapping: G102-007.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G102-007 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G102-007 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.items.some(x=>x.fullName===\"Nigar Əliyeva\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G102 · Search nickname",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries?q=ana",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "ana"
+            }
+          ]
+        },
+        "description": "Test case mapping: G102-009.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G102-009 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G102-009 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.items.some(x=>x.nickname===\"Anam\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G102 · Currency AZN filter",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries?currency=AZN",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ],
+          "query": [
+            {
+              "key": "currency",
+              "value": "AZN"
+            }
+          ]
+        },
+        "description": "Test case mapping: G102-005.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G102-005 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G102-005 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.items.every(x=>x.currency===\"AZN\")).to.equal(true); });",
+              "pm.test(\"G102-005 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(d.items.length); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G102 · q 1-char validation",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries?q=a",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "a"
+            }
+          ]
+        },
+        "description": "Test case mapping: G102-010.\nExpected status: 400.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G102-010 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G102-010 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"q\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G102 · Invalid currency filter",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries?currency=GBP",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ],
+          "query": [
+            {
+              "key": "currency",
+              "value": "GBP"
+            }
+          ]
+        },
+        "description": "Test case mapping: G102-006.\nExpected status: 400.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G102-006 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G102-006 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"currency\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · fullName too short",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-005.\nExpected status: 400.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"A\",\"iban\":\"{{benIban4}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-005 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G101-005 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"fullName\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · fullName containing digit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-010.\nExpected status: 400.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Ali2\",\"iban\":\"{{benIban4}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-010 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G101-010 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"fullName\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Invalid IBAN",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-016.\nExpected status: 400.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Valid Ad\",\"iban\":\"AZ123\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-016 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G101-016 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"iban\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Own account cannot be saved",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-020.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Own Account\",\"iban\":\"AZ29NABZ00000000137010002855\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-020 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code OWN_ACCOUNT\", () => pm.expect(pm.response.json().code).to.equal(\"OWN_ACCOUNT\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Duplicate IBAN",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-017.\nExpected status: 409.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Different Person\",\"iban\":\"{{benIban1}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-017 / HTTP 409\", () => pm.expect(pm.response.code).to.equal(409));",
+              "pm.test(\"Business error code BENEFICIARY_EXISTS\", () => pm.expect(pm.response.json().code).to.equal(\"BENEFICIARY_EXISTS\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Duplicate nickname ANAM",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-019.\nExpected status: 409.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Different Person\",\"iban\":\"{{benIban4}}\",\"currency\":\"AZN\",\"nickname\":\"ANAM\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-019 / HTTP 409\", () => pm.expect(pm.response.code).to.equal(409));",
+              "pm.test(\"Business error code NICKNAME_TAKEN\", () => pm.expect(pm.response.json().code).to.equal(\"NICKNAME_TAKEN\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Seed beneficiary #4",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-001, G101-022.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Cavid Məmmədov\",\"iban\":\"{{benIban4}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G101-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.id).to.exist; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Seed beneficiary #5",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-001, G101-022.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Çinar Rzayev\",\"iban\":\"{{benIban5}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G101-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.id).to.exist; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Seed beneficiary #6",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-001, G101-022.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Dəniz Səfərov\",\"iban\":\"{{benIban6}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G101-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.id).to.exist; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Seed beneficiary #7",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-001, G101-022.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Elvin Quliyev\",\"iban\":\"{{benIban7}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G101-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.id).to.exist; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Seed beneficiary #8",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-001, G101-022.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Fuad Əliyev\",\"iban\":\"{{benIban8}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G101-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.id).to.exist; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Seed beneficiary #9",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-001, G101-022.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Günay Həsənli\",\"iban\":\"{{benIban9}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G101-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.id).to.exist; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Seed beneficiary #10",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-001, G101-022.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"İradə Rəhimova\",\"iban\":\"{{benIban10}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G101-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.id).to.exist; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · 11th beneficiary reaches limit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G101-022.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Əziz Rəşidov\",\"iban\":\"{{benIban11}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G101-022 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code LIMIT_REACHED\", () => pm.expect(pm.response.json().code).to.equal(\"LIMIT_REACHED\"));",
+              "pm.test(\"G101-022 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.limit).to.equal(10); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G102 · Sort by Azerbaijani alphabet",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries?sort=fullName&order=asc",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ],
+          "query": [
+            {
+              "key": "sort",
+              "value": "fullName"
+            },
+            {
+              "key": "order",
+              "value": "asc"
+            }
+          ]
+        },
+        "description": "Test case mapping: G102-003.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G102-003 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G102-003 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.items.length).to.equal(10); });",
+              "pm.test(\"G102-003 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.items.every(x=>typeof x.fullName===\"string\")).to.equal(true); });",
+              "pm.test(\"G102-003 / proper Azerbaijani collation\", () => { const d=pm.response.json(); const names=d.items.map(x=>x.fullName);pm.expect(names).to.eql(names.slice().sort((a,b)=>a.localeCompare(b,\"az\"))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G102 · Empty search → 200 []",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries?q=ZZZZZZZZ",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "ZZZZZZZZ"
+            }
+          ]
+        },
+        "description": "Test case mapping: G102-012.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G102-012 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G102-012 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(0); pm.expect(d.items).to.eql([]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G103 · Delete beneficiary #1 → 204",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries/{{benId1}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries",
+            "{{benId1}}"
+          ]
+        },
+        "description": "Test case mapping: G103-001.\nExpected status: 204.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G103-001 / HTTP 204\", () => pm.expect(pm.response.code).to.equal(204));",
+              "pm.test(\"G103-001 response body is empty\", () => pm.expect(pm.response.text()).to.equal(\"\"));",
+              "pm.test(\"G103-001 response body is empty\", () => pm.expect(pm.response.text()).to.equal(\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G103 · Confirm list 9 after deletion",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G103-002.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G103-002 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G103-002 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(9); pm.expect(d.items.length).to.equal(9); });",
+              "pm.test(\"G103-002 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.items.some(x=>x.id===pm.environment.get(\"benId1\"))).to.equal(false); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G103 · Same delete again → 404",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries/{{benId1}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries",
+            "{{benId1}}"
+          ]
+        },
+        "description": "Test case mapping: G103-003.\nExpected status: 404.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G103-003 / HTTP 404\", () => pm.expect(pm.response.code).to.equal(404));",
+              "pm.test(\"Business error code NOT_FOUND\", () => pm.expect(pm.response.json().code).to.equal(\"NOT_FOUND\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G103 · user2 cannot delete user1 beneficiary",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser2}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries/{{benId2}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries",
+            "{{benId2}}"
+          ]
+        },
+        "description": "Test case mapping: G103-004.\nExpected status: 404.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G103-004 / HTTP 404\", () => pm.expect(pm.response.code).to.equal(404));",
+              "pm.test(\"Business error code NOT_FOUND\", () => pm.expect(pm.response.json().code).to.equal(\"NOT_FOUND\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G103 · User1 resource remains",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G103-004.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G103-004 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G103-004 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.items.some(x=>x.id===pm.environment.get(\"benId2\"))).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 / G101 · Reuse 10th slot after deletion",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/beneficiaries",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "beneficiaries"
+          ]
+        },
+        "description": "Test case mapping: G103-009.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"fullName\":\"Əziz Rəşidov\",\"iban\":\"{{benIban11}}\",\"currency\":\"AZN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G103-009 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.environment.set(\"benId11\", d.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · user1 foreign account 403",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-016.\nExpected status: 403.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_003\",\"initialAmount\":10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-016 / HTTP 403\", () => pm.expect(pm.response.code).to.equal(403));",
+              "pm.test(\"Business error code FORBIDDEN\", () => pm.expect(pm.response.json().code).to.equal(\"FORBIDDEN\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · Nonexistent account → 404",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-017.\nExpected status: 404.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_999\",\"initialAmount\":10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-017 / HTTP 404\", () => pm.expect(pm.response.code).to.equal(404));",
+              "pm.test(\"Business error code ACCOUNT_NOT_FOUND\", () => pm.expect(pm.response.json().code).to.equal(\"ACCOUNT_NOT_FOUND\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · Invalid amount 0.99",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-003, G201-006, G201-007, G201-008.\nExpected status: 400.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_002\",\"initialAmount\":0.99}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-003 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G201-003 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"initialAmount\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · Invalid amount 1000.01",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-003, G201-006, G201-007, G201-008.\nExpected status: 400.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_002\",\"initialAmount\":1000.01}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-003 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G201-003 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"initialAmount\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · Invalid amount 10.555",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-003, G201-006, G201-007, G201-008.\nExpected status: 400.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_002\",\"initialAmount\":10.555}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-003 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G201-003 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"initialAmount\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · Invalid amount 50",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-003, G201-006, G201-007, G201-008.\nExpected status: 400.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_002\",\"initialAmount\":\"50\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-003 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G201-003 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"initialAmount\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · Create card A",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-001, G201-002.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_002\",\"initialAmount\":800,\"label\":\"Main Online\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G201-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"ACTIVE\"); });",
+              "pm.test(\"G201-001 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.currency).to.equal(\"AZN\"); });",
+              "pm.test(\"G201-001 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.availableBalance).to.equal(800); });",
+              "pm.test(\"G201-001 / assertion 4\", () => { const d = pm.response.json(); pm.expect(d.limits.dailyOnline).to.equal(500); pm.expect(d.limits.perTransaction).to.equal(300); });",
+              "pm.test(\"G201-001 / assertion 5\", () => { const d = pm.response.json(); pm.expect(d.spentToday).to.equal(0); });",
+              "pm.test(\"G201-001 / assertion 6\", () => { const d = pm.response.json(); pm.expect(d.maskedPan).to.match(/^4169 73\\*\\* \\*{4} \\d{4}$/); });",
+              "pm.test(\"G201-001 / assertion 7\", () => { const d = pm.response.json(); pm.expect(pm.response.headers.get(\"Location\")).to.equal(\"/cards/\"+d.id); });",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.environment.set(\"cardA\", d.id); }",
+              "pm.test(\"G201-002 / expiry exactly 3 years ahead\", () => { const d=pm.response.json(); const x=new Date(Date.now()+4*3600000);const e=String(x.getUTCMonth()+1).padStart(2,\"0\")+\"/\"+String((x.getUTCFullYear()+3)%100).padStart(2,\"0\");pm.expect(d.expiry).to.equal(e); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · Create card B",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-001, G201-002.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_002\",\"initialAmount\":800,\"label\":\"Daily Limit\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G201-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"ACTIVE\"); });",
+              "pm.test(\"G201-001 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.currency).to.equal(\"AZN\"); });",
+              "pm.test(\"G201-001 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.availableBalance).to.equal(800); });",
+              "pm.test(\"G201-001 / assertion 4\", () => { const d = pm.response.json(); pm.expect(d.limits.dailyOnline).to.equal(500); pm.expect(d.limits.perTransaction).to.equal(300); });",
+              "pm.test(\"G201-001 / assertion 5\", () => { const d = pm.response.json(); pm.expect(d.spentToday).to.equal(0); });",
+              "pm.test(\"G201-001 / assertion 6\", () => { const d = pm.response.json(); pm.expect(d.maskedPan).to.match(/^4169 73\\*\\* \\*{4} \\d{4}$/); });",
+              "pm.test(\"G201-001 / assertion 7\", () => { const d = pm.response.json(); pm.expect(pm.response.headers.get(\"Location\")).to.equal(\"/cards/\"+d.id); });",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.environment.set(\"cardB\", d.id); }",
+              "pm.test(\"G201-002 / expiry exactly 3 years ahead\", () => { const d=pm.response.json(); const x=new Date(Date.now()+4*3600000);const e=String(x.getUTCMonth()+1).padStart(2,\"0\")+\"/\"+String((x.getUTCFullYear()+3)%100).padStart(2,\"0\");pm.expect(d.expiry).to.equal(e); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · Create card C",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-001, G201-002.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_002\",\"initialAmount\":30,\"label\":\"Temporary\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G201-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"ACTIVE\"); });",
+              "pm.test(\"G201-001 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.currency).to.equal(\"AZN\"); });",
+              "pm.test(\"G201-001 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.availableBalance).to.equal(30); });",
+              "pm.test(\"G201-001 / assertion 4\", () => { const d = pm.response.json(); pm.expect(d.limits.dailyOnline).to.equal(500); pm.expect(d.limits.perTransaction).to.equal(300); });",
+              "pm.test(\"G201-001 / assertion 5\", () => { const d = pm.response.json(); pm.expect(d.spentToday).to.equal(0); });",
+              "pm.test(\"G201-001 / assertion 6\", () => { const d = pm.response.json(); pm.expect(d.maskedPan).to.match(/^4169 73\\*\\* \\*{4} \\d{4}$/); });",
+              "pm.test(\"G201-001 / assertion 7\", () => { const d = pm.response.json(); pm.expect(pm.response.headers.get(\"Location\")).to.equal(\"/cards/\"+d.id); });",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.environment.set(\"cardC\", d.id); }",
+              "pm.test(\"G201-002 / expiry exactly 3 years ahead\", () => { const d=pm.response.json(); const x=new Date(Date.now()+4*3600000);const e=String(x.getUTCMonth()+1).padStart(2,\"0\")+\"/\"+String((x.getUTCFullYear()+3)%100).padStart(2,\"0\");pm.expect(d.expiry).to.equal(e); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · Cannot create fourth ACTIVE card",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-020.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_002\",\"initialAmount\":49.5,\"label\":\"Backup\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-020 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code CARD_LIMIT_REACHED\", () => pm.expect(pm.response.json().code).to.equal(\"CARD_LIMIT_REACHED\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G202 · GET freshly created card A",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardA}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardA}}"
+          ]
+        },
+        "description": "Test case mapping: G202-001, G202-003.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G202-001 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G202-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"ACTIVE\"); });",
+              "pm.test(\"G202-001 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.availableBalance).to.equal(800); });",
+              "pm.test(\"G202-001 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.spentToday).to.equal(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G203 · Freeze card C",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardC}}/block",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardC}}",
+            "block"
+          ]
+        },
+        "description": "Test case mapping: G203-001.\nExpected status: 200.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"reason\":\"TEMPORARY\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G203-001 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G203-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"FROZEN\"); });",
+              "pm.test(\"G203-001 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.blockReason).to.equal(\"TEMPORARY\"); });",
+              "pm.test(\"G203-001 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.blockedAt).to.exist; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G203 · Freeze again → ALREADY_FROZEN",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardC}}/block",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardC}}",
+            "block"
+          ]
+        },
+        "description": "Test case mapping: G203-004.\nExpected status: 409.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"reason\":\"TEMPORARY\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G203-004 / HTTP 409\", () => pm.expect(pm.response.code).to.equal(409));",
+              "pm.test(\"Business error code ALREADY_FROZEN\", () => pm.expect(pm.response.json().code).to.equal(\"ALREADY_FROZEN\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G203 · Escalate FROZEN to STOLEN BLOCKED",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardC}}/block",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardC}}",
+            "block"
+          ]
+        },
+        "description": "Test case mapping: G203-006.\nExpected status: 200.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"reason\":\"STOLEN\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G203-006 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G203-006 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"BLOCKED\"); });",
+              "pm.test(\"G203-006 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.blockReason).to.equal(\"STOLEN\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G204 · Permanently blocked cannot unblock",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardC}}/unblock",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardC}}",
+            "unblock"
+          ]
+        },
+        "description": "Test case mapping: G204-006.\nExpected status: 409.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G204-006 / HTTP 409\", () => pm.expect(pm.response.code).to.equal(409));",
+              "pm.test(\"Business error code PERMANENTLY_BLOCKED\", () => pm.expect(pm.response.json().code).to.equal(\"PERMANENTLY_BLOCKED\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G203 · BLOCKED card cannot reblock",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardC}}/block",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardC}}",
+            "block"
+          ]
+        },
+        "description": "Test case mapping: G203-008.\nExpected status: 409.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"reason\":\"LOST\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G203-008 / HTTP 409\", () => pm.expect(pm.response.code).to.equal(409));",
+              "pm.test(\"Business error code CARD_BLOCKED\", () => pm.expect(pm.response.json().code).to.equal(\"CARD_BLOCKED\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · New card D allowed after one BLOCKED",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-021, G203-024.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_002\",\"initialAmount\":49.5,\"label\":\"Backup\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-021 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G201-021 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"ACTIVE\"); });",
+              "pm.test(\"G201-021 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.availableBalance).to.equal(49.5); });",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.environment.set(\"cardD\", d.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G203 · Freeze card D",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardD}}/block",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardD}}",
+            "block"
+          ]
+        },
+        "description": "Test case mapping: G203-001.\nExpected status: 200.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"reason\":\"TEMPORARY\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G203-001 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G203-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"FROZEN\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G202 · GET FROZEN card D",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardD}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardD}}"
+          ]
+        },
+        "description": "Test case mapping: G202-002.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G202-002 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G202-002 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"FROZEN\"); });",
+              "pm.test(\"G202-002 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.blockReason).to.equal(\"TEMPORARY\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G204 · Unblock card D",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardD}}/unblock",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardD}}",
+            "unblock"
+          ]
+        },
+        "description": "Test case mapping: G204-001.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G204-001 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G204-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"ACTIVE\"); });",
+              "pm.test(\"G204-001 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.blockReason).to.equal(null); pm.expect(d.blockedAt).to.equal(null); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G204 · Second unblock of ACTIVE card",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardD}}/unblock",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardD}}",
+            "unblock"
+          ]
+        },
+        "description": "Test case mapping: G204-004.\nExpected status: 409.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G204-004 / HTTP 409\", () => pm.expect(pm.response.code).to.equal(409));",
+              "pm.test(\"Business error code NOT_FROZEN\", () => pm.expect(pm.response.json().code).to.equal(\"NOT_FROZEN\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G202 · Other user cannot view card A",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser2}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardA}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardA}}"
+          ]
+        },
+        "description": "Test case mapping: G202-007.\nExpected status: 404.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G202-007 / HTTP 404\", () => pm.expect(pm.response.code).to.equal(404));",
+              "pm.test(\"Business error code NOT_FOUND\", () => pm.expect(pm.response.json().code).to.equal(\"NOT_FOUND\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 / G201 · User2 creates USD card",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser2}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards"
+          ]
+        },
+        "description": "Test case mapping: G201-015.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"accountId\":\"acc_003\",\"initialAmount\":100,\"label\":\"USD Test\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G201-015 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G201-015 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.currency).to.equal(\"USD\"); });",
+              "pm.test(\"G201-015 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"ACTIVE\"); });",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.environment.set(\"cardUSD\", d.id); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 / G301 · GET 6 billers",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/billers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "billers"
+          ]
+        },
+        "description": "Test case mapping: G301-001, G301-002, G301-003.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G301-001 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G301-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(6); pm.expect(d.items.length).to.equal(6); });",
+              "pm.test(\"G301-001 / assertion 2\", () => { const d = pm.response.json(); pm.expect([\"azerisiq\",\"azersu\",\"azercell\",\"bakcell\",\"citynet\",\"aztelekom\"].every(id=>d.items.some(b=>b.id===id))).to.equal(true); });",
+              "pm.test(\"G301-001 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.items.every(b=>b.subscriberPattern && b.minAmount!==undefined && b.maxAmount!==undefined && b.fee!==undefined)).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 / G301 · category MOBILE",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/billers?category=MOBILE",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "billers"
+          ],
+          "query": [
+            {
+              "key": "category",
+              "value": "MOBILE"
+            }
+          ]
+        },
+        "description": "Test case mapping: G301-007.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G301-007 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G301-007 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(2); pm.expect(d.items.length).to.equal(2); });",
+              "pm.test(\"G301-007 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.items.map(x=>x.id).sort()).to.eql([\"azercell\", \"bakcell\"]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 / G301 · category INTERNET",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/billers?category=INTERNET",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "billers"
+          ],
+          "query": [
+            {
+              "key": "category",
+              "value": "INTERNET"
+            }
+          ]
+        },
+        "description": "Test case mapping: G301-009.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G301-009 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G301-009 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(2); pm.expect(d.items.length).to.equal(2); });",
+              "pm.test(\"G301-009 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.items.map(x=>x.id).sort()).to.eql([\"aztelekom\", \"citynet\"]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 / G301 · category UTILITY",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/billers?category=UTILITY",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "billers"
+          ],
+          "query": [
+            {
+              "key": "category",
+              "value": "UTILITY"
+            }
+          ]
+        },
+        "description": "Test case mapping: G301-008.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G301-008 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G301-008 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(2); pm.expect(d.items.length).to.equal(2); });",
+              "pm.test(\"G301-008 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.items.map(x=>x.id).sort()).to.eql([\"azerisiq\", \"azersu\"]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 / G301 · category GAS invalid",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/billers?category=GAS",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "billers"
+          ],
+          "query": [
+            {
+              "key": "category",
+              "value": "GAS"
+            }
+          ]
+        },
+        "description": "Test case mapping: G301-011.\nExpected status: 400.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G301-011 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G301-011 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"category\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · 1st successful CityNet payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-001, G302-002, G302-007.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":50}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-001 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G302-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"SUCCESS\"); });",
+              "pm.test(\"G302-001 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.fee).to.equal(0.5); });",
+              "pm.test(\"G302-001 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(50.5); });",
+              "pm.test(\"G302-001 / assertion 4\", () => { const d = pm.response.json(); pm.expect(d.balanceAfter).to.equal(749.5); });",
+              "pm.test(\"G302-001 / assertion 5\", () => { const d = pm.response.json(); pm.expect(d.receiptNo).to.match(/^RCP-\\d{8}-000001$/); });",
+              "pm.test(\"G302-001 / assertion 6\", () => { const d = pm.response.json(); pm.expect(pm.response.headers.get(\"Location\")).to.equal(\"/bill-payments/\"+d.id); });",
+              "if (pm.response.code === 201) { const d = pm.response.json(); pm.environment.set(\"firstPaymentId\", d.id); pm.environment.set(\"firstReceiptNo\", d.receiptNo); }",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Idempotent replay same body",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-010, G302-011.\nExpected status: 200.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":50}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-010 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G302-010 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.id).to.equal(pm.environment.get(\"firstPaymentId\")); });",
+              "pm.test(\"G302-010 / assertion 2\", () => { const d = pm.response.json(); pm.expect(pm.response.headers.get(\"Idempotent-Replay\")).to.equal(\"true\"); });",
+              "pm.test(\"G302-010 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.receiptNo).to.equal(pm.environment.get(\"firstReceiptNo\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G202 · CardA after replay, only single debit",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardA}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardA}}"
+          ]
+        },
+        "description": "Test case mapping: G202-004, G202-005, G302-011.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G202-004 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G202-004 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.availableBalance).to.equal(749.5); });",
+              "pm.test(\"G202-004 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.spentToday).to.equal(50.5); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Same key different amount conflict",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-013.\nExpected status: 409.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":51}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-013 / HTTP 409\", () => pm.expect(pm.response.code).to.equal(409));",
+              "pm.test(\"Business error code IDEMPOTENCY_CONFLICT\", () => pm.expect(pm.response.json().code).to.equal(\"IDEMPOTENCY_CONFLICT\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Missing Idempotency-Key",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-015.\nExpected status: 400.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-015 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code IDEMPOTENCY_KEY_REQUIRED\", () => pm.expect(pm.response.json().code).to.equal(\"IDEMPOTENCY_KEY_REQUIRED\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Short Idempotency-Key",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "1234567"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-016.\nExpected status: 400.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-016 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code IDEMPOTENCY_KEY_INVALID\", () => pm.expect(pm.response.json().code).to.equal(\"IDEMPOTENCY_KEY_INVALID\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · amount string rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey2}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-043.\nExpected status: 400.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":\"10\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-043 / HTTP 400\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G302-043 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"amount\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Wrong Azercell subscriber",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey3}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-020.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azercell\",\"subscriberNo\":\"551234567\",\"amount\":10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-020 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code INVALID_SUBSCRIBER\", () => pm.expect(pm.response.json().code).to.equal(\"INVALID_SUBSCRIBER\"));",
+              "pm.test(\"G302-020 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.expected).to.exist; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Azercell amount 0.49 rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey4}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-022.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azercell\",\"subscriberNo\":\"501234567\",\"amount\":0.49}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-022 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code AMOUNT_OUT_OF_RANGE\", () => pm.expect(pm.response.json().code).to.equal(\"AMOUNT_OUT_OF_RANGE\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Azercell amount 0.50 valid",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey5}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-023.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azercell\",\"subscriberNo\":\"501234567\",\"amount\":0.5}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-023 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G302-023 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.fee).to.equal(0); });",
+              "pm.test(\"G302-023 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(0.5); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · CityNet fee BVA amount 5",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey6}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-026.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":5}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-026 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G302-026 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.fee).to.equal(0.2); });",
+              "pm.test(\"G302-026 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(5.2); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · CityNet fee BVA amount 20",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey7}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-027.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":20}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-027 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G302-027 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.fee).to.equal(0.2); });",
+              "pm.test(\"G302-027 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(20.2); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · CityNet fee BVA amount 21",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey8}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-028.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":21}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-028 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G302-028 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.fee).to.equal(0.21); });",
+              "pm.test(\"G302-028 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(21.21); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · CityNet fee BVA amount 150",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey9}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-029.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":150}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-029 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G302-029 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.fee).to.equal(1.5); });",
+              "pm.test(\"G302-029 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(151.5); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Aztelekom fixed fee 0.50",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey10}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-031.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"aztelekom\",\"subscriberNo\":\"1234567\",\"amount\":2}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-031 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G302-031 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.fee).to.equal(0.5); });",
+              "pm.test(\"G302-031 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(2.5); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Per transaction amount 300.01 rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey11}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-035.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":300.01}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-035 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code PER_TRANSACTION_LIMIT\", () => pm.expect(pm.response.json().code).to.equal(\"PER_TRANSACTION_LIMIT\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · USD card rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser2}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey12}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-042.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardUSD}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-042 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code CURRENCY_NOT_SUPPORTED\", () => pm.expect(pm.response.json().code).to.equal(\"CURRENCY_NOT_SUPPORTED\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · BLOCKED card rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey13}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-041, G203-023.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardC}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-041 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code CARD_NOT_ACTIVE\", () => pm.expect(pm.response.json().code).to.equal(\"CARD_NOT_ACTIVE\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G203 · Freeze Backup card D again",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardD}}/block",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardD}}",
+            "block"
+          ]
+        },
+        "description": "Test case mapping: G203-001.\nExpected status: 200.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"reason\":\"TEMPORARY\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G203-001 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G203-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"FROZEN\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · FROZEN card rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey14}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-040, G203-022.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardD}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-040 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code CARD_NOT_ACTIVE\", () => pm.expect(pm.response.json().code).to.equal(\"CARD_NOT_ACTIVE\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G204 · Unblock D before payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardD}}/unblock",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardD}}",
+            "unblock"
+          ]
+        },
+        "description": "Test case mapping: G204-001.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G204-001 / HTTP status\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G204-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.status).to.equal(\"ACTIVE\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Insufficient by 0.01",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey15}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-038.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardD}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":49.51}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-038 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code INSUFFICIENT_FUNDS\", () => pm.expect(pm.response.json().code).to.equal(\"INSUFFICIENT_FUNDS\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Exact balance 49.50 succeeds",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey16}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-039, G204-014, G302-063.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardD}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":49.5}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-039 / HTTP status\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G302-039 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.balanceAfter).to.equal(0); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Unknown biller",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey17}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-048.\nExpected status: 404.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"unknown-service\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-048 / HTTP 404\", () => pm.expect(pm.response.code).to.equal(404));",
+              "pm.test(\"Business error code BILLER_NOT_FOUND\", () => pm.expect(pm.response.json().code).to.equal(\"BILLER_NOT_FOUND\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Unknown card",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey18}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-049.\nExpected status: 404.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{notExistCard}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-049 / HTTP 404\", () => pm.expect(pm.response.code).to.equal(404));",
+              "pm.test(\"Business error code CARD_NOT_FOUND\", () => pm.expect(pm.response.json().code).to.equal(\"CARD_NOT_FOUND\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Retriable failure same-key first request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey19}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-053.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azercell\",\"subscriberNo\":\"501234567\",\"amount\":0.49}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-053 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code AMOUNT_OUT_OF_RANGE\", () => pm.expect(pm.response.json().code).to.equal(\"AMOUNT_OUT_OF_RANGE\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Same key corrected amount successful",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey19}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-053.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azercell\",\"subscriberNo\":\"501234567\",\"amount\":0.5}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-053 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G302-053 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(0.5); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Card B daily limit seed payment 1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey20}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-036, G302-037.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardB}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":250}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-036 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G302-036 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(250); });",
+              "if(pm.response.code===201)pm.environment.set(\"cardBPayment1\",pm.response.json().id);",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Card B daily limit seed payment 2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey21}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-036, G302-037.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardB}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":250}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-036 / HTTP 201\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G302-036 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(250); });",
+              "if(pm.response.code===201)pm.environment.set(\"cardBPayment2\",pm.response.json().id);",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · Card B daily cap reached",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey22}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G302-036.\nExpected status: 422.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardB}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-036 / HTTP 422\", () => pm.expect(pm.response.code).to.equal(422));",
+              "pm.test(\"Business error code DAILY_LIMIT_EXCEEDED\", () => pm.expect(pm.response.json().code).to.equal(\"DAILY_LIMIT_EXCEEDED\"));",
+              "pm.test(\"G302-036 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.remaining).to.equal(0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · History fixture #12 (1 AZN)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey23}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G303-043.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-043 / HTTP status\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G303-002 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(1); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · History fixture #13 (1 AZN)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey24}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G303-043.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-043 / HTTP status\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G303-002 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(1); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · History fixture #14 (1 AZN)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey25}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G303-043.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-043 / HTTP status\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G303-002 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(1); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · History fixture #15 (1 AZN)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey26}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G303-043.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-043 / HTTP status\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G303-002 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(1); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · History fixture #16 (1 AZN)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey27}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G303-043.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-043 / HTTP status\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G303-002 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(1); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · History fixture #17 (1 AZN)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey28}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G303-043.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-043 / HTTP status\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G303-002 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(1); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · History fixture #18 (1 AZN)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{payKey29}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G303-043.\nExpected status: 201.\nRunner must be executed in its authored order.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-043 / HTTP status\", () => pm.expect(pm.response.code).to.equal(201));",
+              "pm.test(\"G303-002 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(1); });",
+              "if(pm.response.code===201){const d=pm.response.json();const dt=new Date(Date.parse(d.createdAt)+4*3600000).toISOString().slice(0,10);const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");counts[dt]=(counts[dt]||0)+1;pm.environment.set(\"paymentsByBakuDate\",JSON.stringify(counts));}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 / G302 · GET card A financial state after many payments",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/cards/{{cardA}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "cards",
+            "{{cardA}}"
+          ]
+        },
+        "description": "Test case mapping: G302-004, G302-005.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G302-004 / HTTP 200\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G302-004 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.spentToday>50.5).to.equal(true); });",
+              "pm.test(\"G302-004 / assertion 2\", () => { const d = pm.response.json(); pm.expect(Math.abs(d.availableBalance+d.spentToday-800)<0.011).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Default history page=1 limit=10",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G303-001, G303-002, G303-003, G303-006.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-001 / HTTP status\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G303-001 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.page).to.equal(1); });",
+              "pm.test(\"G303-001 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.limit).to.equal(10); });",
+              "pm.test(\"G303-001 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(18); });",
+              "pm.test(\"G303-001 / assertion 4\", () => { const d = pm.response.json(); pm.expect(d.totalPages).to.equal(2); });",
+              "pm.test(\"G303-001 / assertion 5\", () => { const d = pm.response.json(); pm.expect(d.items.length).to.equal(10); });",
+              "pm.test(\"G303-001 / assertion 6\", () => { const d = pm.response.json(); pm.expect(d.items.every((x,i,a)=>i===0 || Date.parse(a[i-1].createdAt)>=Date.parse(x.createdAt))).to.equal(true); });",
+              "pm.test(\"G303-003 / response history schema\", () => { const d=pm.response.json(); pm.expect(d.items.every(x=>x.id && x.receiptNo && x.billerId && x.createdAt && typeof x.total===\"number\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Page 2 has 8 remaining payments",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?page=2&limit=10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "2"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-005.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-005 / HTTP status\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G303-002 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.page).to.equal(2); });",
+              "pm.test(\"G303-002 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(18); });",
+              "pm.test(\"G303-002 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.totalPages).to.equal(2); });",
+              "pm.test(\"G303-002 / assertion 4\", () => { const d = pm.response.json(); pm.expect(d.items.length).to.equal(8); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Out-of-range page 3 returns 200 []",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?page=3&limit=10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "3"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-009.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-009 / HTTP status\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G303-003 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(18); });",
+              "pm.test(\"G303-003 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.totalPages).to.equal(2); });",
+              "pm.test(\"G303-003 / assertion 3\", () => { const d = pm.response.json(); pm.expect(d.items).to.eql([]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Invalid query limit 0",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?limit=0",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "0"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-011.\nExpected status: 400.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-011 / HTTP status\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G303-004 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"limit\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Invalid query limit 51",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?limit=51",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "51"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-014.\nExpected status: 400.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-014 / HTTP status\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G303-004 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"limit\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Invalid query page 0",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?page=0",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-018.\nExpected status: 400.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-018 / HTTP status\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G303-004 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"page\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Invalid query page -1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?page=-1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "-1"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-019.\nExpected status: 400.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-019 / HTTP status\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G303-004 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"page\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Invalid query page abc",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?page=abc",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "abc"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-020.\nExpected status: 400.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-020 / HTTP status\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G303-004 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"page\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Invalid query invalid month",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?from=2026-13-01",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "from",
+              "value": "2026-13-01"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-024.\nExpected status: 400.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-024 / HTTP status\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));",
+              "pm.test(\"G303-005 / assertion 1\", () => { const d = pm.response.json(); pm.expect(Array.isArray(d.details) && d.details.some(x=>x.field===\"from\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Invalid query from > to",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?from=2026-10-12&to=2026-10-11",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "from",
+              "value": "2026-10-12"
+            },
+            {
+              "key": "to",
+              "value": "2026-10-11"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-029.\nExpected status: 400.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-029 / HTTP status\", () => pm.expect(pm.response.code).to.equal(400));",
+              "pm.test(\"Business error code VALIDATION_ERROR\", () => pm.expect(pm.response.json().code).to.equal(\"VALIDATION_ERROR\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Limit BVA accepts 1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?limit=1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-012.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-012 / HTTP status\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G303-004 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.limit).to.equal(1); });",
+              "pm.test(\"G303-004 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(18); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Limit BVA accepts 50",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?limit=50",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "50"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-013.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-013 / HTTP status\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G303-004 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.limit).to.equal(50); });",
+              "pm.test(\"G303-004 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(18); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · Today inclusive Baku date",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?from={{todayBaku}}&to={{todayBaku}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "from",
+              "value": "{{todayBaku}}"
+            },
+            {
+              "key": "to",
+              "value": "{{todayBaku}}"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-031.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set(\"todayBaku\",new Date(Date.now()+4*3600000).toISOString().slice(0,10));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-031 / HTTP status\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G303-007 / assertion 1\", () => { const d = pm.response.json(); const counts=JSON.parse(pm.environment.get(\"paymentsByBakuDate\")||\"{}\");pm.expect(d.total).to.equal(counts[pm.environment.get(\"todayBaku\")]||0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · citynet filter matches 5 payments",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?billerId=citynet",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "billerId",
+              "value": "citynet"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-035, G303-036.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-035 / HTTP status\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G303-008 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(5); });",
+              "pm.test(\"G303-008 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.items.every(x=>x.billerId===\"citynet\")).to.equal(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · cardB filter matches 2 payments",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser1}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments?cardId={{cardB}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ],
+          "query": [
+            {
+              "key": "cardId",
+              "value": "{{cardB}}"
+            }
+          ]
+        },
+        "description": "Test case mapping: G303-039.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-039 / HTTP status\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G303-015 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(2); });",
+              "pm.test(\"G303-015 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.items.map(x=>x.id).sort()).to.eql([pm.environment.get(\"cardBPayment1\"),pm.environment.get(\"cardBPayment2\")].sort()); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 / G303 · user2 history isolated empty",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{tokenUser2}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bill-payments",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bill-payments"
+          ]
+        },
+        "description": "Test case mapping: G303-046.\nExpected status: 200.\nRunner must be executed in its authored order."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"G303-046 / HTTP status\", () => pm.expect(pm.response.code).to.equal(200));",
+              "pm.test(\"G303-025 / assertion 1\", () => { const d = pm.response.json(); pm.expect(d.total).to.equal(0); });",
+              "pm.test(\"G303-025 / assertion 2\", () => { const d = pm.response.json(); pm.expect(d.items).to.eql([]); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

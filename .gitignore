@@ -1,0 +1,19 @@
+/target/
+/reports/
+/.idea/
+/.gauge/
+*.iml
+.DS_Store
+.env
+*.log
+!/evidence/preflight.log
+*.out
+__pycache__/
+*.py[cod]
+
+/libs/
+/.env.*
+!/env.example
+
+# Contains reusable bearer tokens; never commit or share.
+/.qa-sandbox/

@@ -1,0 +1,3166 @@
+[
+  {
+    "number": 1,
+    "name": "00 / AUTH-01 · Login user1",
+    "method": "POST",
+    "url": "{{baseUrl}}/auth/login",
+    "headers": [
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"email\":\"{{user1Email}}\",\"password\":\"{{user1Password}}\"}",
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 2,
+    "name": "00 / AUTH-02 · Login user2",
+    "method": "POST",
+    "url": "{{baseUrl}}/auth/login",
+    "headers": [
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"email\":\"{{user2Email}}\",\"password\":\"{{user2Password}}\"}",
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 3,
+    "name": "00 / AUTH-03 · GET without token → 401",
+    "method": "GET",
+    "url": "{{baseUrl}}/billers",
+    "headers": [],
+    "body": null,
+    "expectedStatus": 401,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 1
+  },
+  {
+    "number": 4,
+    "name": "00 / AUTH-04 · GET invalid token → 401",
+    "method": "GET",
+    "url": "{{baseUrl}}/billers",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer invalid-token"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 401,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 1
+  },
+  {
+    "number": 5,
+    "name": "01 / G101 · Create beneficiary #1",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Nigar Əliyeva\",\"iban\":\"{{benIban1}}\",\"currency\":\"AZN\",\"nickname\":\"Anam\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "currency",
+        "value": "AZN"
+      }
+    ],
+    "sourcePmTestBlocks": 6
+  },
+  {
+    "number": 6,
+    "name": "01 / G101 · Create beneficiary #2",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Tural Hüseynov\",\"iban\":\"{{benIban2Formatted}}\",\"currency\":\"AZN\",\"nickname\":\"Dost\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "currency",
+        "value": "AZN"
+      },
+      {
+        "kind": "variable",
+        "path": "iban",
+        "variable": "benIban2"
+      }
+    ],
+    "sourcePmTestBlocks": 7
+  },
+  {
+    "number": 7,
+    "name": "01 / G101 · Create beneficiary #3",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Əli Həsənov\",\"iban\":\"{{benIban3}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "currency",
+        "value": "AZN"
+      },
+      {
+        "kind": "equals",
+        "path": "nickname",
+        "value": null
+      }
+    ],
+    "sourcePmTestBlocks": 7
+  },
+  {
+    "number": 8,
+    "name": "01 / G102 · Default list 3 entries",
+    "method": "GET",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 3
+      },
+      {
+        "kind": "equals",
+        "path": "items.length",
+        "value": 3
+      },
+      {
+        "kind": "length",
+        "path": "items",
+        "value": 3
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 9,
+    "name": "01 / G102 · Search name case-insensitive",
+    "method": "GET",
+    "url": "{{baseUrl}}/beneficiaries?q=NIGAR",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 10,
+    "name": "01 / G102 · Search nickname",
+    "method": "GET",
+    "url": "{{baseUrl}}/beneficiaries?q=ana",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 11,
+    "name": "01 / G102 · Currency AZN filter",
+    "method": "GET",
+    "url": "{{baseUrl}}/beneficiaries?currency=AZN",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 12,
+    "name": "01 / G102 · q 1-char validation",
+    "method": "GET",
+    "url": "{{baseUrl}}/beneficiaries?q=a",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "q"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 13,
+    "name": "01 / G102 · Invalid currency filter",
+    "method": "GET",
+    "url": "{{baseUrl}}/beneficiaries?currency=GBP",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "currency"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 14,
+    "name": "01 / G101 · fullName too short",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"A\",\"iban\":\"{{benIban4}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "fullName"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 15,
+    "name": "01 / G101 · fullName containing digit",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Ali2\",\"iban\":\"{{benIban4}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "fullName"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 16,
+    "name": "01 / G101 · Invalid IBAN",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Valid Ad\",\"iban\":\"AZ123\",\"currency\":\"AZN\"}",
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "iban"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 17,
+    "name": "01 / G101 · Own account cannot be saved",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Own Account\",\"iban\":\"AZ29NABZ00000000137010002855\",\"currency\":\"AZN\"}",
+    "expectedStatus": 422,
+    "errorCode": "OWN_ACCOUNT",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 18,
+    "name": "01 / G101 · Duplicate IBAN",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Different Person\",\"iban\":\"{{benIban1}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 409,
+    "errorCode": "BENEFICIARY_EXISTS",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 19,
+    "name": "01 / G101 · Duplicate nickname ANAM",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Different Person\",\"iban\":\"{{benIban4}}\",\"currency\":\"AZN\",\"nickname\":\"ANAM\"}",
+    "expectedStatus": 409,
+    "errorCode": "NICKNAME_TAKEN",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 20,
+    "name": "01 / G101 · Seed beneficiary #4",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Cavid Məmmədov\",\"iban\":\"{{benIban4}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "exists",
+        "path": "id"
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 21,
+    "name": "01 / G101 · Seed beneficiary #5",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Çinar Rzayev\",\"iban\":\"{{benIban5}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "exists",
+        "path": "id"
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 22,
+    "name": "01 / G101 · Seed beneficiary #6",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Dəniz Səfərov\",\"iban\":\"{{benIban6}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "exists",
+        "path": "id"
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 23,
+    "name": "01 / G101 · Seed beneficiary #7",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Elvin Quliyev\",\"iban\":\"{{benIban7}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "exists",
+        "path": "id"
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 24,
+    "name": "01 / G101 · Seed beneficiary #8",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Fuad Əliyev\",\"iban\":\"{{benIban8}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "exists",
+        "path": "id"
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 25,
+    "name": "01 / G101 · Seed beneficiary #9",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Günay Həsənli\",\"iban\":\"{{benIban9}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "exists",
+        "path": "id"
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 26,
+    "name": "01 / G101 · Seed beneficiary #10",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"İradə Rəhimova\",\"iban\":\"{{benIban10}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "exists",
+        "path": "id"
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 27,
+    "name": "01 / G101 · 11th beneficiary reaches limit",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Əziz Rəşidov\",\"iban\":\"{{benIban11}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 422,
+    "errorCode": "LIMIT_REACHED",
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "limit",
+        "value": 10
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 28,
+    "name": "01 / G102 · Sort by Azerbaijani alphabet",
+    "method": "GET",
+    "url": "{{baseUrl}}/beneficiaries?sort=fullName&order=asc",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "items.length",
+        "value": 10
+      },
+      {
+        "kind": "length",
+        "path": "items",
+        "value": 10
+      }
+    ],
+    "sourcePmTestBlocks": 4
+  },
+  {
+    "number": 29,
+    "name": "01 / G102 · Empty search → 200 []",
+    "method": "GET",
+    "url": "{{baseUrl}}/beneficiaries?q=ZZZZZZZZ",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 0
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 30,
+    "name": "01 / G103 · Delete beneficiary #1 → 204",
+    "method": "DELETE",
+    "url": "{{baseUrl}}/beneficiaries/{{benId1}}",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 204,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 31,
+    "name": "01 / G103 · Confirm list 9 after deletion",
+    "method": "GET",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 9
+      },
+      {
+        "kind": "equals",
+        "path": "items.length",
+        "value": 9
+      },
+      {
+        "kind": "length",
+        "path": "items",
+        "value": 9
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 32,
+    "name": "01 / G103 · Same delete again → 404",
+    "method": "DELETE",
+    "url": "{{baseUrl}}/beneficiaries/{{benId1}}",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 404,
+    "errorCode": "NOT_FOUND",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 33,
+    "name": "01 / G103 · user2 cannot delete user1 beneficiary",
+    "method": "DELETE",
+    "url": "{{baseUrl}}/beneficiaries/{{benId2}}",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser2}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 404,
+    "errorCode": "NOT_FOUND",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 34,
+    "name": "01 / G103 · User1 resource remains",
+    "method": "GET",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 35,
+    "name": "01 / G101 · Reuse 10th slot after deletion",
+    "method": "POST",
+    "url": "{{baseUrl}}/beneficiaries",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"fullName\":\"Əziz Rəşidov\",\"iban\":\"{{benIban11}}\",\"currency\":\"AZN\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 1
+  },
+  {
+    "number": 36,
+    "name": "02 / G201 · user1 foreign account 403",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_003\",\"initialAmount\":10}",
+    "expectedStatus": 403,
+    "errorCode": "FORBIDDEN",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 37,
+    "name": "02 / G201 · Nonexistent account → 404",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_999\",\"initialAmount\":10}",
+    "expectedStatus": 404,
+    "errorCode": "ACCOUNT_NOT_FOUND",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 38,
+    "name": "02 / G201 · Invalid amount 0.99",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_002\",\"initialAmount\":0.99}",
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "initialAmount"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 39,
+    "name": "02 / G201 · Invalid amount 1000.01",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_002\",\"initialAmount\":1000.01}",
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "initialAmount"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 40,
+    "name": "02 / G201 · Invalid amount 10.555",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_002\",\"initialAmount\":10.555}",
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "initialAmount"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 41,
+    "name": "02 / G201 · Invalid amount 50",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_002\",\"initialAmount\":\"50\"}",
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "initialAmount"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 42,
+    "name": "02 / G201 · Create card A",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_002\",\"initialAmount\":800,\"label\":\"Main Online\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "ACTIVE"
+      },
+      {
+        "kind": "equals",
+        "path": "currency",
+        "value": "AZN"
+      },
+      {
+        "kind": "equals",
+        "path": "availableBalance",
+        "value": 800
+      },
+      {
+        "kind": "equals",
+        "path": "limits.dailyOnline",
+        "value": 500
+      },
+      {
+        "kind": "equals",
+        "path": "limits.perTransaction",
+        "value": 300
+      },
+      {
+        "kind": "equals",
+        "path": "spentToday",
+        "value": 0
+      }
+    ],
+    "sourcePmTestBlocks": 9
+  },
+  {
+    "number": 43,
+    "name": "02 / G201 · Create card B",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_002\",\"initialAmount\":800,\"label\":\"Daily Limit\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "ACTIVE"
+      },
+      {
+        "kind": "equals",
+        "path": "currency",
+        "value": "AZN"
+      },
+      {
+        "kind": "equals",
+        "path": "availableBalance",
+        "value": 800
+      },
+      {
+        "kind": "equals",
+        "path": "limits.dailyOnline",
+        "value": 500
+      },
+      {
+        "kind": "equals",
+        "path": "limits.perTransaction",
+        "value": 300
+      },
+      {
+        "kind": "equals",
+        "path": "spentToday",
+        "value": 0
+      }
+    ],
+    "sourcePmTestBlocks": 9
+  },
+  {
+    "number": 44,
+    "name": "02 / G201 · Create card C",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_002\",\"initialAmount\":30,\"label\":\"Temporary\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "ACTIVE"
+      },
+      {
+        "kind": "equals",
+        "path": "currency",
+        "value": "AZN"
+      },
+      {
+        "kind": "equals",
+        "path": "availableBalance",
+        "value": 30
+      },
+      {
+        "kind": "equals",
+        "path": "limits.dailyOnline",
+        "value": 500
+      },
+      {
+        "kind": "equals",
+        "path": "limits.perTransaction",
+        "value": 300
+      },
+      {
+        "kind": "equals",
+        "path": "spentToday",
+        "value": 0
+      }
+    ],
+    "sourcePmTestBlocks": 9
+  },
+  {
+    "number": 45,
+    "name": "02 / G201 · Cannot create fourth ACTIVE card",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_002\",\"initialAmount\":49.5,\"label\":\"Backup\"}",
+    "expectedStatus": 422,
+    "errorCode": "CARD_LIMIT_REACHED",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 46,
+    "name": "02 / G202 · GET freshly created card A",
+    "method": "GET",
+    "url": "{{baseUrl}}/cards/{{cardA}}",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "ACTIVE"
+      },
+      {
+        "kind": "equals",
+        "path": "availableBalance",
+        "value": 800
+      },
+      {
+        "kind": "equals",
+        "path": "spentToday",
+        "value": 0
+      }
+    ],
+    "sourcePmTestBlocks": 4
+  },
+  {
+    "number": 47,
+    "name": "02 / G203 · Freeze card C",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards/{{cardC}}/block",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"reason\":\"TEMPORARY\"}",
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "FROZEN"
+      },
+      {
+        "kind": "equals",
+        "path": "blockReason",
+        "value": "TEMPORARY"
+      },
+      {
+        "kind": "exists",
+        "path": "blockedAt"
+      }
+    ],
+    "sourcePmTestBlocks": 4
+  },
+  {
+    "number": 48,
+    "name": "02 / G203 · Freeze again → ALREADY_FROZEN",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards/{{cardC}}/block",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"reason\":\"TEMPORARY\"}",
+    "expectedStatus": 409,
+    "errorCode": "ALREADY_FROZEN",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 49,
+    "name": "02 / G203 · Escalate FROZEN to STOLEN BLOCKED",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards/{{cardC}}/block",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"reason\":\"STOLEN\"}",
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "BLOCKED"
+      },
+      {
+        "kind": "equals",
+        "path": "blockReason",
+        "value": "STOLEN"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 50,
+    "name": "02 / G204 · Permanently blocked cannot unblock",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards/{{cardC}}/unblock",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 409,
+    "errorCode": "PERMANENTLY_BLOCKED",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 51,
+    "name": "02 / G203 · BLOCKED card cannot reblock",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards/{{cardC}}/block",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"reason\":\"LOST\"}",
+    "expectedStatus": 409,
+    "errorCode": "CARD_BLOCKED",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 52,
+    "name": "02 / G201 · New card D allowed after one BLOCKED",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_002\",\"initialAmount\":49.5,\"label\":\"Backup\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "ACTIVE"
+      },
+      {
+        "kind": "equals",
+        "path": "availableBalance",
+        "value": 49.5
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 53,
+    "name": "02 / G203 · Freeze card D",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards/{{cardD}}/block",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"reason\":\"TEMPORARY\"}",
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "FROZEN"
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 54,
+    "name": "02 / G202 · GET FROZEN card D",
+    "method": "GET",
+    "url": "{{baseUrl}}/cards/{{cardD}}",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "FROZEN"
+      },
+      {
+        "kind": "equals",
+        "path": "blockReason",
+        "value": "TEMPORARY"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 55,
+    "name": "02 / G204 · Unblock card D",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards/{{cardD}}/unblock",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "ACTIVE"
+      },
+      {
+        "kind": "equals",
+        "path": "blockReason",
+        "value": null
+      },
+      {
+        "kind": "equals",
+        "path": "blockedAt",
+        "value": null
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 56,
+    "name": "02 / G204 · Second unblock of ACTIVE card",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards/{{cardD}}/unblock",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 409,
+    "errorCode": "NOT_FROZEN",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 57,
+    "name": "02 / G202 · Other user cannot view card A",
+    "method": "GET",
+    "url": "{{baseUrl}}/cards/{{cardA}}",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser2}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 404,
+    "errorCode": "NOT_FOUND",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 58,
+    "name": "02 / G201 · User2 creates USD card",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser2}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"accountId\":\"acc_003\",\"initialAmount\":100,\"label\":\"USD Test\"}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "currency",
+        "value": "USD"
+      },
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "ACTIVE"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 59,
+    "name": "03 / G301 · GET 6 billers",
+    "method": "GET",
+    "url": "{{baseUrl}}/billers",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 6
+      },
+      {
+        "kind": "equals",
+        "path": "items.length",
+        "value": 6
+      },
+      {
+        "kind": "length",
+        "path": "items",
+        "value": 6
+      }
+    ],
+    "sourcePmTestBlocks": 4
+  },
+  {
+    "number": 60,
+    "name": "03 / G301 · category MOBILE",
+    "method": "GET",
+    "url": "{{baseUrl}}/billers?category=MOBILE",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 2
+      },
+      {
+        "kind": "equals",
+        "path": "items.length",
+        "value": 2
+      },
+      {
+        "kind": "length",
+        "path": "items",
+        "value": 2
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 61,
+    "name": "03 / G301 · category INTERNET",
+    "method": "GET",
+    "url": "{{baseUrl}}/billers?category=INTERNET",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 2
+      },
+      {
+        "kind": "equals",
+        "path": "items.length",
+        "value": 2
+      },
+      {
+        "kind": "length",
+        "path": "items",
+        "value": 2
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 62,
+    "name": "03 / G301 · category UTILITY",
+    "method": "GET",
+    "url": "{{baseUrl}}/billers?category=UTILITY",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 2
+      },
+      {
+        "kind": "equals",
+        "path": "items.length",
+        "value": 2
+      },
+      {
+        "kind": "length",
+        "path": "items",
+        "value": 2
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 63,
+    "name": "03 / G301 · category GAS invalid",
+    "method": "GET",
+    "url": "{{baseUrl}}/billers?category=GAS",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "category"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 64,
+    "name": "04 / G302 · 1st successful CityNet payment",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":50}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "SUCCESS"
+      },
+      {
+        "kind": "equals",
+        "path": "fee",
+        "value": 0.5
+      },
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 50.5
+      },
+      {
+        "kind": "equals",
+        "path": "balanceAfter",
+        "value": 749.5
+      }
+    ],
+    "sourcePmTestBlocks": 7
+  },
+  {
+    "number": 65,
+    "name": "04 / G302 · Idempotent replay same body",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":50}",
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "variable",
+        "path": "id",
+        "variable": "firstPaymentId"
+      },
+      {
+        "kind": "variable",
+        "path": "receiptNo",
+        "variable": "firstReceiptNo"
+      },
+      {
+        "kind": "header",
+        "header": "Idempotent-Replay",
+        "value": "true"
+      }
+    ],
+    "sourcePmTestBlocks": 4
+  },
+  {
+    "number": 66,
+    "name": "04 / G202 · CardA after replay, only single debit",
+    "method": "GET",
+    "url": "{{baseUrl}}/cards/{{cardA}}",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "availableBalance",
+        "value": 749.5
+      },
+      {
+        "kind": "equals",
+        "path": "spentToday",
+        "value": 50.5
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 67,
+    "name": "04 / G302 · Same key different amount conflict",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":51}",
+    "expectedStatus": 409,
+    "errorCode": "IDEMPOTENCY_CONFLICT",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 68,
+    "name": "04 / G302 · Missing Idempotency-Key",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+    "expectedStatus": 400,
+    "errorCode": "IDEMPOTENCY_KEY_REQUIRED",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 69,
+    "name": "04 / G302 · Short Idempotency-Key",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "1234567"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+    "expectedStatus": 400,
+    "errorCode": "IDEMPOTENCY_KEY_INVALID",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 70,
+    "name": "04 / G302 · amount string rejected",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey2}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":\"10\"}",
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "amount"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 71,
+    "name": "04 / G302 · Wrong Azercell subscriber",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey3}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azercell\",\"subscriberNo\":\"551234567\",\"amount\":10}",
+    "expectedStatus": 422,
+    "errorCode": "INVALID_SUBSCRIBER",
+    "assertions": [
+      {
+        "kind": "exists",
+        "path": "expected"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 72,
+    "name": "04 / G302 · Azercell amount 0.49 rejected",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey4}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azercell\",\"subscriberNo\":\"501234567\",\"amount\":0.49}",
+    "expectedStatus": 422,
+    "errorCode": "AMOUNT_OUT_OF_RANGE",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 73,
+    "name": "04 / G302 · Azercell amount 0.50 valid",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey5}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azercell\",\"subscriberNo\":\"501234567\",\"amount\":0.5}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "fee",
+        "value": 0
+      },
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 0.5
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 74,
+    "name": "04 / G302 · CityNet fee BVA amount 5",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey6}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":5}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "fee",
+        "value": 0.2
+      },
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 5.2
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 75,
+    "name": "04 / G302 · CityNet fee BVA amount 20",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey7}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":20}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "fee",
+        "value": 0.2
+      },
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 20.2
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 76,
+    "name": "04 / G302 · CityNet fee BVA amount 21",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey8}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":21}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "fee",
+        "value": 0.21
+      },
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 21.21
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 77,
+    "name": "04 / G302 · CityNet fee BVA amount 150",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey9}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"citynet\",\"subscriberNo\":\"CN123456\",\"amount\":150}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "fee",
+        "value": 1.5
+      },
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 151.5
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 78,
+    "name": "04 / G302 · Aztelekom fixed fee 0.50",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey10}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"aztelekom\",\"subscriberNo\":\"1234567\",\"amount\":2}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "fee",
+        "value": 0.5
+      },
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 2.5
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 79,
+    "name": "04 / G302 · Per transaction amount 300.01 rejected",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey11}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":300.01}",
+    "expectedStatus": 422,
+    "errorCode": "PER_TRANSACTION_LIMIT",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 80,
+    "name": "04 / G302 · USD card rejected",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser2}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey12}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardUSD}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+    "expectedStatus": 422,
+    "errorCode": "CURRENCY_NOT_SUPPORTED",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 81,
+    "name": "04 / G302 · BLOCKED card rejected",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey13}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardC}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+    "expectedStatus": 422,
+    "errorCode": "CARD_NOT_ACTIVE",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 82,
+    "name": "04 / G203 · Freeze Backup card D again",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards/{{cardD}}/block",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"reason\":\"TEMPORARY\"}",
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "FROZEN"
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 83,
+    "name": "04 / G302 · FROZEN card rejected",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey14}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardD}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+    "expectedStatus": 422,
+    "errorCode": "CARD_NOT_ACTIVE",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 84,
+    "name": "04 / G204 · Unblock D before payment",
+    "method": "POST",
+    "url": "{{baseUrl}}/cards/{{cardD}}/unblock",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "status",
+        "value": "ACTIVE"
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 85,
+    "name": "04 / G302 · Insufficient by 0.01",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey15}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardD}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":49.51}",
+    "expectedStatus": 422,
+    "errorCode": "INSUFFICIENT_FUNDS",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 86,
+    "name": "04 / G302 · Exact balance 49.50 succeeds",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey16}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardD}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":49.5}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "balanceAfter",
+        "value": 0
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 87,
+    "name": "04 / G302 · Unknown biller",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey17}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"unknown-service\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+    "expectedStatus": 404,
+    "errorCode": "BILLER_NOT_FOUND",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 88,
+    "name": "04 / G302 · Unknown card",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey18}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{notExistCard}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":10}",
+    "expectedStatus": 404,
+    "errorCode": "CARD_NOT_FOUND",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 89,
+    "name": "04 / G302 · Retriable failure same-key first request",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey19}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azercell\",\"subscriberNo\":\"501234567\",\"amount\":0.49}",
+    "expectedStatus": 422,
+    "errorCode": "AMOUNT_OUT_OF_RANGE",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 90,
+    "name": "04 / G302 · Same key corrected amount successful",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey19}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azercell\",\"subscriberNo\":\"501234567\",\"amount\":0.5}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 0.5
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 91,
+    "name": "04 / G302 · Card B daily limit seed payment 1",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey20}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardB}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":250}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 250
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 92,
+    "name": "04 / G302 · Card B daily limit seed payment 2",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey21}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardB}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":250}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 250
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 93,
+    "name": "04 / G302 · Card B daily cap reached",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey22}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardB}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+    "expectedStatus": 422,
+    "errorCode": "DAILY_LIMIT_EXCEEDED",
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "remaining",
+        "value": 0
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 94,
+    "name": "04 / G302 · History fixture #12 (1 AZN)",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey23}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 1
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 95,
+    "name": "04 / G302 · History fixture #13 (1 AZN)",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey24}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 1
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 96,
+    "name": "04 / G302 · History fixture #14 (1 AZN)",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey25}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 1
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 97,
+    "name": "04 / G302 · History fixture #15 (1 AZN)",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey26}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 1
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 98,
+    "name": "04 / G302 · History fixture #16 (1 AZN)",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey27}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 1
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 99,
+    "name": "04 / G302 · History fixture #17 (1 AZN)",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey28}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 1
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 100,
+    "name": "04 / G302 · History fixture #18 (1 AZN)",
+    "method": "POST",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      },
+      {
+        "key": "Idempotency-Key",
+        "value": "{{payKey29}}"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": "{\"cardId\":\"{{cardA}}\",\"billerId\":\"azerisiq\",\"subscriberNo\":\"1234567890\",\"amount\":1}",
+    "expectedStatus": 201,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 1
+      }
+    ],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 101,
+    "name": "04 / G302 · GET card A financial state after many payments",
+    "method": "GET",
+    "url": "{{baseUrl}}/cards/{{cardA}}",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 102,
+    "name": "05 / G303 · Default history page=1 limit=10",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "page",
+        "value": 1
+      },
+      {
+        "kind": "equals",
+        "path": "limit",
+        "value": 10
+      },
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 18
+      },
+      {
+        "kind": "equals",
+        "path": "totalPages",
+        "value": 2
+      },
+      {
+        "kind": "equals",
+        "path": "items.length",
+        "value": 10
+      },
+      {
+        "kind": "length",
+        "path": "items",
+        "value": 10
+      }
+    ],
+    "sourcePmTestBlocks": 8
+  },
+  {
+    "number": 103,
+    "name": "05 / G303 · Page 2 has 8 remaining payments",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?page=2&limit=10",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "page",
+        "value": 2
+      },
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 18
+      },
+      {
+        "kind": "equals",
+        "path": "totalPages",
+        "value": 2
+      },
+      {
+        "kind": "equals",
+        "path": "items.length",
+        "value": 8
+      },
+      {
+        "kind": "length",
+        "path": "items",
+        "value": 8
+      }
+    ],
+    "sourcePmTestBlocks": 5
+  },
+  {
+    "number": 104,
+    "name": "05 / G303 · Out-of-range page 3 returns 200 []",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?page=3&limit=10",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 18
+      },
+      {
+        "kind": "equals",
+        "path": "totalPages",
+        "value": 2
+      }
+    ],
+    "sourcePmTestBlocks": 4
+  },
+  {
+    "number": 105,
+    "name": "05 / G303 · Invalid query limit 0",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?limit=0",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "limit"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 106,
+    "name": "05 / G303 · Invalid query limit 51",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?limit=51",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "limit"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 107,
+    "name": "05 / G303 · Invalid query page 0",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?page=0",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "page"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 108,
+    "name": "05 / G303 · Invalid query page -1",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?page=-1",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "page"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 109,
+    "name": "05 / G303 · Invalid query page abc",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?page=abc",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "page"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 110,
+    "name": "05 / G303 · Invalid query invalid month",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?from=2026-13-01",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [
+      {
+        "kind": "validationField",
+        "field": "from"
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 111,
+    "name": "05 / G303 · Invalid query from > to",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?from=2026-10-12&to=2026-10-11",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 400,
+    "errorCode": "VALIDATION_ERROR",
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 112,
+    "name": "05 / G303 · Limit BVA accepts 1",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?limit=1",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "limit",
+        "value": 1
+      },
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 18
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 113,
+    "name": "05 / G303 · Limit BVA accepts 50",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?limit=50",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "limit",
+        "value": 50
+      },
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 18
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 114,
+    "name": "05 / G303 · Today inclusive Baku date",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?from={{todayBaku}}&to={{todayBaku}}",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [],
+    "sourcePmTestBlocks": 2
+  },
+  {
+    "number": 115,
+    "name": "05 / G303 · citynet filter matches 5 payments",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?billerId=citynet",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 5
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 116,
+    "name": "05 / G303 · cardB filter matches 2 payments",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments?cardId={{cardB}}",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser1}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 2
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  },
+  {
+    "number": 117,
+    "name": "05 / G303 · user2 history isolated empty",
+    "method": "GET",
+    "url": "{{baseUrl}}/bill-payments",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer {{tokenUser2}}"
+      }
+    ],
+    "body": null,
+    "expectedStatus": 200,
+    "errorCode": null,
+    "assertions": [
+      {
+        "kind": "equals",
+        "path": "total",
+        "value": 0
+      }
+    ],
+    "sourcePmTestBlocks": 3
+  }
+]

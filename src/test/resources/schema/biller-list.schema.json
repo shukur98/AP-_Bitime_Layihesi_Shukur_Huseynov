@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "GRAD-301 provider catalog",
+  "type": "object",
+  "required": [
+    "total",
+    "items"
+  ],
+  "properties": {
+    "total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "category",
+          "subscriberPattern",
+          "minAmount",
+          "maxAmount",
+          "fee"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "enum": [
+              "UTILITY",
+              "MOBILE",
+              "INTERNET"
+            ]
+          },
+          "subscriberPattern": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minAmount": {
+            "type": "number",
+            "minimum": 0
+          },
+          "maxAmount": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "fee": {
+            "type": "object",
+            "required": [
+              "type"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

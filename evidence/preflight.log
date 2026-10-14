@@ -1,0 +1,14 @@
+[PRE-FLIGHT PASS] 117 request contracts, 337 pm.test blocks, 9 translated JS .length property checks
+[NOTE] This verifies migration metadata and expression grammar, NOT live HTTP or full JS assertion parity.
+[AUDIT] 337 source pm.test blocks / 117 requests
+  EXACT_STATUS: 117
+  EXACT_ERROR_CODE: 46
+  EXACT_LITERAL: 93
+  EXACT_EXISTS: 9
+  EXACT_EMPTY_BODY: 2
+  MANIFEST_SEMANTIC: 17
+  HANDWRITTEN_SEMANTIC: 53
+  REVIEW_REQUIRED: 0
+[AUDIT] Static evidence is conservative; HANDWRITTEN_SEMANTIC is NOT byte-for-byte JS parity.
+[AZ COLLATION PASS] 10-name API sample, 32 letters, I/?, ?, case, Unicode, antisymmetry
+[OFFLINE PASS] Mapping, audit, Python, Azerbaijani collation checked. No API calls were made.
